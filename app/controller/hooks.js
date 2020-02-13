@@ -142,7 +142,7 @@ exports.mpesaPayment= async(req, res)=>{
  const mpesaTransaction = await getMpesaTransaction(CheckoutRequestID)
   if(mpesaTransaction.length>0){
     const To="whatsapp:+14155238886";
-    const body=`Please enter your *${First}* and *${Last}* Name`;
+    const body=`Please enter your *${"First"}* and *${"Last"}* Name`;
 
     for(i=0; i<mpesaTransaction.length;i++ ){
       const From="whatsapp:+"+mpesaTransaction[i].phoneNumber
