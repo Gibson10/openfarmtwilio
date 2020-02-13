@@ -96,17 +96,7 @@ switch(req.body.queryResult.intent.displayName) {
         res.setHeader("Content-Type","application/json");
         res.send(JSON.stringify(
           { 
-          fulfillmentText: `Please enter First and Second name. Example(John Doe)`,
-          sessionEntityTypes:[
-          {
-            name:"projects/openfarm-idpnex/agent/sessions/openfarm-idpnex/entityTypes/customersNames",
-            entities:Orders.map(res =>({
-            value:res.customerName,
-            synonyms:[res.customerName,res.customerName]
-            })),
-            entityOverrideMode:"ENTITY_OVERRIDE_MODE_OVERRIDE",
-          }
-        ]
+          fulfillmentText: `Please enter First and Second name. Example(John Doe)`
        }
         ));
            
@@ -114,23 +104,12 @@ switch(req.body.queryResult.intent.displayName) {
 
     case 'Start - confirmation - mpesa - number':
 
-         var phonenumber=req.body.queryResult.queryText;
-         const Order= await findOrders();
+         const phonenumber=req.body.queryResult.queryText;
+    
          res.setHeader("Content-Type","application/json");
          res.send(JSON.stringify(
-           {fulfillmentText:`Your number has been approved, you will be prompted to enter your M-pesa Pin  shortly on the phone with the number ${phonenumber}`,
-         sessionEntityTypes:[
-          {
-            name:"projects/openfarm-idpnex/agent/sessions/openfarm-idpnex/entityTypes/customersNames",
-            entities:Order.map(res =>({
-             value:res.customerName,
-             synonyms:[res.customerName,res.customerName]
-            })),
-            entityOverrideMode:"ENTITY_OVERRIDE_MODE_OVERRIDE",
-          }
-        ]
-        }
-        ))
+           {fulfillmentText:`Your number has been approved, you will be prompted to enter your M-pesa Pin  shortly on the phone with the number ${phonenumber}` }))
+
           var MpesaTransactionResponse= await MpesaTransaction(phonenumber); 
           const data={
             phoneNumber:phonenumber,
@@ -163,7 +142,7 @@ exports.mpesaPayment= async(req, res)=>{
  const mpesaTransaction = await getMpesaTransaction(CheckoutRequestID)
   if(mpesaTransaction.length>0){
     const To="whatsapp:+14155238886";
-    const body="Please enter your First and Last Name";
+    const body=`Please enter your *${First}* and *${Last}* Name`;
 
     for(i=0; i<mpesaTransaction.length;i++ ){
       const From="whatsapp:+"+mpesaTransaction[i].phoneNumber
