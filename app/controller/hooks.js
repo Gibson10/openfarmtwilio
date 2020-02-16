@@ -11,6 +11,7 @@ exports.sendTwilio = async (req, res)=>{
   // Here we're sending the received message to Dialogflow so that it can be identified against an Intent.
   runQuery(Body, From)
     .then((result) => {
+      
       console.log(result.fulfillmentText);
       console.log(From);
       console.log(To)
@@ -38,6 +39,7 @@ exports.sendDialogueFlow=async(req, res)=>{
 switch(req.body.queryResult.intent.displayName) {
   
   case "Start":
+
     const Product= await findProducts()
     res.setHeader("Content-Type","application/json");
     res.send(JSON.stringify({
@@ -124,9 +126,10 @@ switch(req.body.queryResult.intent.displayName) {
       var productAbbreviation3=req.body.queryResult.parameters.productAbbreviation;
       var ProductDetails= await findProductByCode(productAbbreviation3);
       var createOrder=await addOrders(ProductDetails,name,"mpesa")
+      console.log("JINA", name)
 
          res.setHeader("Content-Type","application/json");
-         res.send({fulfillmentText:`Thank you very much ${name} for making an order of ` + ProductDetails.map((res)=> `${res.productName}  at  ${res.productPrice}.We will be processing your order and making a delivery soon. Please don't hesitate to contact ${res.vendorPhone} for a delayed delivery`)})
+         res.send( JSON.stringify({fulfillmentText:`Thank you very much ${name} for making an order of ` + ProductDetails.map((res)=> `${res.productName}  at  ${res.productPrice}.We will be processing your order and making a delivery soon. Please don't hesitate to contact ${res.vendorPhone} for a delayed delivery`)}))
     break;  
 
   default:

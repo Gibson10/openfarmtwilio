@@ -20,10 +20,10 @@ function MpesaTransaction(phone){
   return new Promise(function (resolve,reject){
   mpesa
   .lipaNaMpesaOnline({
-    BusinessShortCode: 174379,
+    BusinessShortCode: 5058963,
     Amount: 1,
     PartyA: phone,
-    PartyB: 174379,
+    PartyB: 5058963,
     PhoneNumber: phone,
     CallBackURL: "https://openfarmwhatsapp.herokuapp.com/mpesapayment",
     AccountReference: "Payment",
@@ -48,7 +48,7 @@ function MpesaTransaction(phone){
 
 
 }
-
+//174379
 
 
 module.exports={
