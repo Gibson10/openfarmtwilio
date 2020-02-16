@@ -1,4 +1,5 @@
 const express = require('express');
+const {upload}=require('../../services/imageupload');
 const ctrl = require('../controller')
 const bodyParser = require('body-parser');
 let urlencodedParser = bodyParser.json();
@@ -7,13 +8,18 @@ const productCtrl = ctrl.transactions;
 const orderCtrl=ctrl.transactions;
 const vendorCtrl=ctrl.transactions;
 const transactionCtrl=ctrl.transactions;
+const imageUpload=ctrl.transactions
 const getOrders=ctrl.transactions;
 const getTransactions=ctrl.transactions;
 const getVendors=ctrl.transactions;
 const getProducts=ctrl.transactions;
 const getCustomerByPhone=ctrl.transactions;
 const getVendorByPhone=ctrl.transactions
+
 const hooks=ctrl.hooks;
+
+
+
 
 
  
@@ -27,7 +33,8 @@ router.get('/getTransactions',getTransactions.getTransactions);
 router.get('/getVendors',getVendors.getVendors);
 router.get('/getProducts',getProducts.getProducts);
 router.post('/getCustomerByNumber',getCustomerByPhone.getCustomerByPhone);
-router.post('/getVendorByNumber',getVendorByPhone.getVendorByPhone);
+router.get('/getVendorByNumber',getVendorByPhone.getVendorByPhone);
+router.post('/uploadimage',urlencodedParser,upload.single('image'),imageUpload.imageUpload);
 
     
     

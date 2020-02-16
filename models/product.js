@@ -10,6 +10,7 @@ var mongoose = require('mongoose');
   vendorName    : String,
   vendorLocation: String,
   vendorPhone:String,
+  productImage:String,
   measuringUnits:String,
   code:String,
   createdAt   : {

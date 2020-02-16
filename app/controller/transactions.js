@@ -1,10 +1,17 @@
+
+require('dotenv').config()
 const Product= require('../../models/product');
 const Transaction= require('../../models/transactions');
+const cloudinary = require('cloudinary');
 const Order=require('../../models/orders');
 const  Vendor= require('../../models/vendors');
 const {findProducts,makeid,findOrders}=require('../../utils/Queries');
 
-
+cloudinary.config({
+	cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+	api_key: process.env.COUDINARY_API_KEY,
+	api_secret: process.env.CLOUDINARY_API_SECRET,
+});
 
 exports.addProducts=(req, res)=>{
   var randomUserId = makeid();
@@ -164,3 +171,19 @@ exports.getProducts=async (req,res)=>{
     return res.send(Products);
 }
 
+
+
+exports.imageUpload=(req, res)=>{
+
+    console.log(req.file.path)
+    var filepath = undefined; 
+    cloudinary.uploader.upload(req.file.path, function(result) {
+        filepath = result.secure_url;
+        console.log(filepath);
+    })
+
+    
+    return res.json({
+        image: req.file.path
+    });
+}
