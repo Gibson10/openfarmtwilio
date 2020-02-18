@@ -40,7 +40,20 @@ function findOrders(){
 });
 }
 
-function addOrders(data,name,type){
+function findOrdersbyNumber(number){
+
+  return new Promise(function (resolve,reject){
+    Orders.findOne({customerNumber:number} ,{},{ sort: { "createdAt": -1 } },function(err, result){
+     
+        if(err){
+        reject(err);
+        }
+        resolve (result);
+      });
+});
+}
+
+function addOrders(data,name,type,number){
   return new Promise(function (resolve,reject){
 data.map( (res) =>{
      const dataitem= {
@@ -49,6 +62,7 @@ data.map( (res) =>{
         vendorName: res.vendorName,
         vendorLocation: res.vendorLocation,
         customerName:name,
+        customerNumber:number,
         transactionType:type,
         vendorPhone: res.vendorPhone,}
 
@@ -117,5 +131,6 @@ module.exports={
     addOrders,
     addMpesaTransaction,
     getMpesaTransaction,
-    findUserByToken
+    findUserByToken,
+    findOrdersbyNumber
 }

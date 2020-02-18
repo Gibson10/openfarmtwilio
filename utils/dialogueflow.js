@@ -29,6 +29,17 @@ const sessionClient = new dialogflow.SessionsClient({
               // The language used by the client (en-US)
               languageCode: "en-US"
             }
+          },
+          queryParams: {
+            payload: {
+              fields: {
+                twilioNumber: {
+                  stringValue: number,
+                  kind: "stringValue"
+                },
+              
+              }
+            }
           }
         };
   
