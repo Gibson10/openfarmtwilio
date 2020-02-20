@@ -1,11 +1,16 @@
 
 require('dotenv').config()
 const Product= require('../../models/product');
+const multer  = require('multer')
 const Transaction= require('../../models/transactions');
 const cloudinary = require('cloudinary');
+const express = require('express');
+const {upload}=require('../../services/imageupload');
 const Order=require('../../models/orders');
 const  Vendor= require('../../models/vendors');
 const {findProducts,makeid,findOrders}=require('../../utils/Queries');
+
+
 
 cloudinary.config({
 	cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
@@ -16,6 +21,13 @@ cloudinary.config({
 exports.addProducts=(req, res)=>{
   var randomUserId = makeid();
 
+ var filepath = undefined; 
+    cloudinary.uploader.upload(req.file.path, function(result) {
+        console.log(result)
+        filepath = result.secure_url;
+       console.log(filepath);
+    });
+
  const data = {
     productName:req.body.productName,
     productCategory:req.body.productCategory,
@@ -23,10 +35,11 @@ exports.addProducts=(req, res)=>{
     vendorName  : req.body.vendorName,
     vendorLocation: req.body.vendorLocation,
     vendorPhone:req.body.vendorPhone,
+    productImage:filepath,
     code:randomUserId.slice(0,3).toUpperCase(), 
  }
 
-  console.log();
+ 
     Product.create(data , function(error, result){
         if (error){
             return res.send({
@@ -173,17 +186,15 @@ exports.getProducts=async (req,res)=>{
 
 
 
-exports.imageUpload=(req, res)=>{
+// exports.imageUpload=(req, res)=>{
 
-    console.log(req.file.path)
-    var filepath = undefined; 
-    cloudinary.uploader.upload(req.file.path, function(result) {
-        filepath = result.secure_url;
-        console.log(filepath);
-    })
+//     upload(req, res, function (err) {
+//         if (err instanceof multer.MulterError) {
+//             return res.status(500).json(err)
+//         } else if (err) {
+//             return res.status(500).json(err)
+//         }
+//      return res.status(200).send(req.file)
 
-    
-    return res.json({
-        image: req.file.path
-    });
-}
+//  })
+// }

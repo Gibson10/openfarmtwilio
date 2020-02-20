@@ -15,7 +15,6 @@ const getVendors=ctrl.transactions;
 const getProducts=ctrl.transactions;
 const getCustomerByPhone=ctrl.transactions;
 const getVendorByPhone=ctrl.transactions
-
 const hooks=ctrl.hooks;
 
 
@@ -27,14 +26,14 @@ const hooks=ctrl.hooks;
 router.post('/addOrders',urlencodedParser, orderCtrl.addOrder);
 router.post('/addTransactions',urlencodedParser, transactionCtrl.addTransaction);
 router.post('/addVendors',urlencodedParser, vendorCtrl.addVendors);
-router.post('/addProducts',urlencodedParser, productCtrl.addProducts);
+router.post('/addProducts',urlencodedParser,upload,productCtrl.addProducts);
 router.get('/getOrders',getOrders.getOrders);
 router.get('/getTransactions',getTransactions.getTransactions);
 router.get('/getVendors',getVendors.getVendors);
 router.get('/getProducts',getProducts.getProducts);
 router.post('/getCustomerByNumber',getCustomerByPhone.getCustomerByPhone);
 router.get('/getVendorByNumber',getVendorByPhone.getVendorByPhone);
-router.post('/uploadimage',urlencodedParser,upload.single('image'),imageUpload.imageUpload);
+
 
     
     
