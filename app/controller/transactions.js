@@ -157,7 +157,8 @@ exports.getCustomerByPhone=(req, res)=>{
         if(err){
         return res.send("An error has happened")
         }
-  
+
+        console.log(result)
         return res.send(result);
   
       })

@@ -32,7 +32,7 @@ router.get('/getTransactions',getTransactions.getTransactions);
 router.get('/getVendors',getVendors.getVendors);
 router.get('/getProducts',getProducts.getProducts);
 router.post('/getCustomerByNumber',getCustomerByPhone.getCustomerByPhone);
-router.get('/getVendorByNumber',getVendorByPhone.getVendorByPhone);
+router.post('/getVendorByNumber',getVendorByPhone.getVendorByPhone);
 
 
     
