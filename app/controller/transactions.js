@@ -21,14 +21,14 @@ cloudinary.config({
 exports.addProducts=(req, res)=>{
   var randomUserId = makeid();
 
- var filepath = undefined; 
+ var filepath = ''; 
+
     cloudinary.uploader.upload(req.file.path, function(result) {
         console.log(result)
         filepath = result.secure_url;
        console.log(filepath);
-    });
-
-console.log("ProductImage",filepath);
+   
+// console.log("ProductImage",filepath);
  const data = {
     productName:req.body.productName,
     productCategory:req.body.productCategory,
@@ -36,7 +36,7 @@ console.log("ProductImage",filepath);
     vendorName  : req.body.vendorName,
     vendorLocation: req.body.vendorLocation,
     vendorPhone:req.body.vendorPhone,
-    productImage:filepath,
+    productImage:result.secure_url,
     code:randomUserId.slice(0,3).toUpperCase(), 
  }
 
@@ -52,6 +52,8 @@ console.log("ProductImage",filepath);
              }
             );
     })
+});
+
 }
 
 
