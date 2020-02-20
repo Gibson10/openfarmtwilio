@@ -28,6 +28,7 @@ exports.addProducts=(req, res)=>{
        console.log(filepath);
     });
 
+console.log("ProductImage",filepath);
  const data = {
     productName:req.body.productName,
     productCategory:req.body.productCategory,
