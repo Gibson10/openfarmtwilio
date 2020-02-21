@@ -76,7 +76,7 @@ switch(req.body.queryResult.intent.displayName) {
   
        res.setHeader("Content-Type","application/json");
        res.send(JSON.stringify({
-        fulfillmentText: `Hello Welcome to OpenFarm, here is the list of products we are offering now: \n`+  Product.map((res,index)=>`*${index+1}.* ${res.productName}\nPrice: ${res.productPrice}\nLocation: ${res.vendorLocation}\nShortCode: *${res.code}*\nImage:${UrlShortener(res.productImage)}`).join("\n\n") +'\n' +`Please respond with the Shortcode of the product you are interested in, example *${"XYZ"}*`,
+        fulfillmentText: `Hello Welcome to OpenFarm, here is the list of products we are offering now: \n`+  Product.map(async (res,index)=>`*${index+1}.* ${res.productName}\nPrice: ${res.productPrice}\nLocation: ${res.vendorLocation}\nShortCode: *${res.code}*\nImage:${await UrlShortener(res.productImage)}`).join("\n\n") +'\n' +`Please respond with the Shortcode of the product you are interested in, example *${"XYZ"}*`,
 
       sessionEntityTypes:[
       {

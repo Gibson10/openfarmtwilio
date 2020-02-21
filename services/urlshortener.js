@@ -2,18 +2,16 @@ var shortUrl = require('node-url-shortener');
 
 
 function UrlShortener(url){
+return new Promise(function (resolve,reject){
 
-var imageUrl='';
 
 shortUrl.short(url, function(err, result){
     console.log(result);
-    imageUrl = result;
-
+    resolve(result);
 });
 
-
-console.log(imageUrl);
-return imageUrl;
+reject(err)
+    })
 }
 
 module.exports={
