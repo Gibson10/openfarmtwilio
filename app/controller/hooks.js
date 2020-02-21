@@ -3,13 +3,16 @@ const {runQuery}= require("../../utils/dialogueflow");
 const {sendMessage}= require("../../utils/twilio");
 const {MpesaTransaction} =require('../../utils/mpesa')
 const {findProducts, findProductByCode,findOrders,addOrders,addMpesaTransaction,getMpesaTransaction,findOrdersbyNumber}=require('../../utils/Queries');
+const {MpesaNumberFormat,TwilioNumberFormat,twilioToNormalNumberFormat} = require('../../services/PhoneNumber') 
+const {vendorNotification}= require('../../utils/Notifications');
+const {UrlShortener} = require('../../services/urlshortener');
 
 
 
 exports.sendTwilio = async (req, res)=>{
   const { Body, To, From } = req.body;
   // Here we're sending the received message to Dialogflow so that it can be identified against an Intent.
-  runQuery(Body, From)
+  runQuery(Body, From,To)
     .then((result) => {
       
       console.log(result.fulfillmentText);
@@ -42,20 +45,16 @@ exports.sendDialogueFlow=async(req, res)=>{
 switch(req.body.queryResult.intent.displayName) {
   
   case "Start":
-    const number=req.body.originalDetectIntentRequest.payload.twilioNumber;
-    const phoneNumber1=number.substring(9, 22);
-    console.log(phoneNumber1);
-    const Product= await findProducts()
+    var number=req.body.originalDetectIntentRequest.payload.customerNumber;
+    var phoneNumber1=number.substring(9, 22);
+    var Product= await findProducts();
+    var Orders= await findOrdersbyNumber(phoneNumber1);
 
-
-    const Orders= await findOrdersbyNumber(phoneNumber1);
-    console.log(Orders);
-
+   
     if(Orders){
-
       res.setHeader("Content-Type","application/json");
       res.send(JSON.stringify({
-        fulfillmentText: `Hello ${Orders.customerName} Welcome back to OpenFarm,We hope you enjoyed your last order of ${Orders.productName}. Here is the list of products we are offering today: \n`+  Product.map((res,index)=>`*${index+1}.* ${res.productName}\nPrice: ${res.productPrice}\nLocation: ${res.vendorLocation}\nShortCode: *${res.code}* `).join("\n\n") +'\n' +`Please respond with the Shortcode of the product you are interested in, example *${"XYZ"}*`,
+        fulfillmentText: `Hello ${Orders.customerName} Welcome back to OpenFarm,We hope you enjoyed your last order of ${Orders.productName}. Here is the list of products we are offering today: \n`+  Product.map((res,index)=>`*${index+1}.* ${res.productName}\nPrice: ${res.productPrice}\nLocation: ${res.vendorLocation}\nShortCode: *${res.code}*\nImage:${UrlShortener(res.productImage)} `).join("\n\n") +'\n' +`Please respond with the Shortcode of the product you are interested in, example *${"XYZ"}*`,
   
         sessionEntityTypes:[
         {
@@ -75,9 +74,9 @@ switch(req.body.queryResult.intent.displayName) {
     
     else{
   
-    res.setHeader("Content-Type","application/json");
-    res.send(JSON.stringify({
-      fulfillmentText: `Hello Welcome to OpenFarm, here is the list of products we are offering now: \n`+  Product.map((res,index)=>`*${index+1}.* ${res.productName}\nPrice: ${res.productPrice}\nLocation: ${res.vendorLocation}\nShortCode: *${res.code}* `).join("\n\n") +'\n' +`Please respond with the Shortcode of the product you are interested in, example *${"XYZ"}*`,
+       res.setHeader("Content-Type","application/json");
+       res.send(JSON.stringify({
+        fulfillmentText: `Hello Welcome to OpenFarm, here is the list of products we are offering now: \n`+  Product.map((res,index)=>`*${index+1}.* ${res.productName}\nPrice: ${res.productPrice}\nLocation: ${res.vendorLocation}\nShortCode: *${res.code}*\nImage:${UrlShortener(res.productImage)}`).join("\n\n") +'\n' +`Please respond with the Shortcode of the product you are interested in, example *${"XYZ"}*`,
 
       sessionEntityTypes:[
       {
@@ -95,19 +94,18 @@ switch(req.body.queryResult.intent.displayName) {
   
     break;
     }
-  case "Start - custom":
-     const code=req.body.queryResult.queryText;
-     const ProductbyCode = await findProductByCode(code);
 
+  case "Start - custom":
+         var code=req.body.queryResult.queryText;
+         var ProductbyCode = await findProductByCode(code);
      if(ProductbyCode.length>0){
-      res.setHeader("Content-Type","application/json");
-      res.send({fulfillmentText:`Great Choice! You have selected `+ ProductbyCode.map((res)=>`${res.productName}\n Do you want to continue to purchase ${res.productName} at ${res.productPrice}`) + `\n *${"A"}*:yes \n *${"B"}*:no`
-              
+         res.setHeader("Content-Type","application/json");
+         res.send({fulfillmentText:`Great Choice! You have selected `+ ProductbyCode.map((res)=>`${res.productName}\n Do you want to continue to purchase ${res.productName} at ${res.productPrice}`) + `\n *${"A"}*:yes \n *${"B"}*:no`      
       })
     }else{
-      res.setHeader("Content-Type","application/json");
-      res.send({fulfillmentText:`Sorry, we could not find the Product, Please enter the *
-      ${"ShorCode"}* again.Please confirm before resending`
+         res.setHeader("Content-Type","application/json");
+         res.send({fulfillmentText:`Sorry, we could not find the Product, Please enter the *
+        ${"ShorCode"}* again.Please confirm before resending`
               
       })
 
@@ -116,8 +114,8 @@ switch(req.body.queryResult.intent.displayName) {
     break;
 
     case 'Start - confirmation':
-       const confirmation=req.body.queryResult.queryText;
-       var productAbbreviation=req.body.queryResult.parameters.productAbbreviation;
+          var confirmation=req.body.queryResult.queryText;
+          var productAbbreviation=req.body.queryResult.parameters.productAbbreviation;
 
        if(confirmation==="A"){
           var ProductPrice= await findProductByCode(productAbbreviation);
@@ -132,58 +130,55 @@ switch(req.body.queryResult.intent.displayName) {
     break;
      
     case 'Start - confirmation - payment':   
-    var payment=req.body.queryResult.queryText;
+          var payment=req.body.queryResult.queryText;
       if(payment.toLowerCase()==='mpesa'){
           res.setHeader("Content-Type","application/json");
-          res.send({fulfillmentText: `Please enter your mpesa number to continue`,
-  
+          res.send({fulfillmentText: `Please enter your mpesa number to continue.Example(*${'07xxxxxxxx'}*)`,
         });
-
       }
-
-        res.setHeader("Content-Type","application/json");
-        res.send(JSON.stringify(
+         res.setHeader("Content-Type","application/json");
+         res.send(JSON.stringify(
           { 
           fulfillmentText: `Please enter First and Second name. Example(John Doe)`
-       }
+          }
         ));
            
     break;
 
     case 'Start - confirmation - mpesa - number':
-
+         var twilioPhoneNumber=req.body.originalDetectIntentRequest.payload.twilioNumber;
          var phonenumber=req.body.queryResult.queryText;
-    
+         var mpesaPhoneNumber= MpesaNumberFormat(phonenumber);
+  
          res.setHeader("Content-Type","application/json");
          res.send(JSON.stringify(
            {fulfillmentText:`Your number has been approved, you will be prompted to enter your M-pesa Pin  shortly on the phone with the number ${phonenumber}` }))
 
-          var MpesaTransactionResponse= await MpesaTransaction(phonenumber); 
-          const data={
-            phoneNumber:phonenumber,
+         var MpesaTransactionResponse= await MpesaTransaction(mpesaPhoneNumber); 
+         var data={
+            twilioNumber:twilioPhoneNumber,
+            phoneNumber:mpesaPhoneNumber,
             CheckoutRequestID:MpesaTransactionResponse.CheckoutRequestID,
-          }
-          addMpesaTransaction(data)
+        }
+         addMpesaTransaction(data)
 
     break;
 
     case 'Start - confirmation - payment - username':
-      const number1=req.body.originalDetectIntentRequest.payload.twilioNumber;
-      const phoneNumber=number1.substring(9, 22)
-      console.log(phoneNumber.substring(9, 21));
+          var number1=req.body.originalDetectIntentRequest.payload.customerNumber;
+          var twilio=req.body.originalDetectIntentRequest.payload.twilioNumber
+          var phoneNumber=twilioToNormalNumberFormat(number1);
+          var name=req.body.queryResult.queryText;
+          var productAbbreviation3=req.body.queryResult.parameters.productAbbreviation;
+          var ProductDetails= await findProductByCode(productAbbreviation3);
+          var createOrder=await addOrders(ProductDetails,name,"mpesa",phoneNumber)
+          console.log("ORDER",createOrder);
 
-      var name=req.body.queryResult.queryText;
-      var productAbbreviation3=req.body.queryResult.parameters.productAbbreviation;
-      console.log("ProductAbbreviation",productAbbreviation3);
-      var ProductDetails= await findProductByCode(productAbbreviation3);
-      console.log(ProductDetails);
+          res.setHeader("Content-Type","application/json");
+          res.send( JSON.stringify({fulfillmentText:`Thank you very much ${name} for making an order of ` + ProductDetails.map((res)=> `${res.productName}  at  ${res.productPrice}.We will be processing your order and making a delivery soon. Please don't hesitate to contact ${res.vendorPhone} for a delayed delivery`)}))
 
-      var createOrder=await addOrders(ProductDetails,name,"mpesa",phoneNumber)
+          vendorNotification(number1,twilio,createOrder)
 
-      console.log("JINA", name)
-
-         res.setHeader("Content-Type","application/json");
-         res.send( JSON.stringify({fulfillmentText:`Thank you very much ${name} for making an order of ` + ProductDetails.map((res)=> `${res.productName}  at  ${res.productPrice}.We will be processing your order and making a delivery soon. Please don't hesitate to contact ${res.vendorPhone} for a delayed delivery`)}))
     break;  
 
   default:
@@ -193,29 +188,28 @@ switch(req.body.queryResult.intent.displayName) {
 
 
 exports.mpesaPayment= async(req, res)=>{
- const statusResponse=req.body.Body.stkCallback.ResultDesc;
- const CheckoutRequestID=req.body.Body.stkCallback.CheckoutRequestID
- if(statusResponse==="The service request is processed successfully."){
- const mpesaTransaction = await getMpesaTransaction(CheckoutRequestID)
-  if(mpesaTransaction.length>0){
-    const To="whatsapp:+14155238886";
-    const body=`Please enter your *${"First"}* and *${"Last"}* Name`;
-
+          const statusResponse=req.body.Body.stkCallback.ResultDesc;
+          const CheckoutRequestID=req.body.Body.stkCallback.CheckoutRequestID
+   if(statusResponse==="The service request is processed successfully."){
+          const mpesaTransaction = await getMpesaTransaction(CheckoutRequestID)
+   if(mpesaTransaction.length>0){
+          const To=process.env.TWILIO_PHONE_NUMBER;
+          const body=`Please enter your *${"First"}* and *${"Last"}* Name`;
     for(i=0; i<mpesaTransaction.length;i++ ){
-      const From="whatsapp:+"+mpesaTransaction[i].phoneNumber
-      console.log(To)
-      sendMessage(From,To,body)
+          const From=TwilioNumberFormat(mpesaTransaction[i].phoneNumber)
+          console.log(To)
+          sendMessage(From,To,body)
     }
   }
-} else{
-  const mpesaTransaction = await getMpesaTransaction(CheckoutRequestID)
-  if(mpesaTransaction.length>0){
-    const To="whatsapp:+14155238886";
-    const body=statusResponse;
-    for(i=0; i<mpesaTransaction.length;i++ ){
-      const From="whatsapp:+"+mpesaTransaction[i].phoneNumber
-      console.log(To)
-      sendMessage(From,To,body)
+    } else{
+          const mpesaTransaction = await getMpesaTransaction(CheckoutRequestID)
+    if(mpesaTransaction.length>0){
+          const To=process.env.TWILIO_PHONE_NUMBER;
+          const body=statusResponse;
+     for(i=0; i<mpesaTransaction.length;i++ ){
+          const From="whatsapp:+"+mpesaTransaction[i].phoneNumber
+          console.log(To)
+          sendMessage(From,To,body)
     }
   }
 

@@ -7,6 +7,7 @@ var mongoose = require('mongoose');
  var mpesaSchema = new mongoose.Schema({
  CheckoutRequestID : String,
   phoneNumber: String,
+  twilioNumber:String,
   createdAt   : {
     type      : Date,
     default   : Date.now()

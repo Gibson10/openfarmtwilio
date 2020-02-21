@@ -9,7 +9,7 @@ const sessionClient = new dialogflow.SessionsClient({
 
   const projectId=process.env.DIALOGFLOW_PROJECT_ID;
   
-   function runQuery(query,number){
+   function runQuery(query,number,twilioNumber){
     return new Promise(async (resolve, reject) => {
       try {
         // A unique identifier for the given session
@@ -33,10 +33,15 @@ const sessionClient = new dialogflow.SessionsClient({
           queryParams: {
             payload: {
               fields: {
-                twilioNumber: {
+                customerNumber: {
                   stringValue: number,
                   kind: "stringValue"
                 },
+                 twilioNumber: {
+                  stringValue: twilioNumber,
+                  kind: "stringValue"
+                },
+              
               
               }
             }

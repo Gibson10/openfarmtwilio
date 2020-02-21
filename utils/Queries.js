@@ -57,7 +57,7 @@ function addOrders(data,name,type,number){
   return new Promise(function (resolve,reject){
 data.map( (res) =>{
      const dataitem= {
-       productName:res.productName,
+        productName:res.productName,
         productPrice: res.productPrice,
         vendorName: res.vendorName,
         vendorLocation: res.vendorLocation,
