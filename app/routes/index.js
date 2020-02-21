@@ -15,6 +15,9 @@ const getVendors=ctrl.transactions;
 const getProducts=ctrl.transactions;
 const getCustomerByPhone=ctrl.transactions;
 const getVendorByPhone=ctrl.transactions
+const deleteProductById=ctrl.transactions
+const deleteVendorById=ctrl.transactions
+
 const hooks=ctrl.hooks;
 
 
@@ -33,6 +36,8 @@ router.get('/getVendors',getVendors.getVendors);
 router.get('/getProducts',getProducts.getProducts);
 router.post('/getCustomerByNumber',getCustomerByPhone.getCustomerByPhone);
 router.post('/getVendorByNumber',getVendorByPhone.getVendorByPhone);
+router.post('/deleteVendorById',urlencodedParser,deleteVendorById.deleteVendorById);
+router.post('/deleteProductById',urlencodedParser,deleteProductById.deleteProductById);
 
 
     

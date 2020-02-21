@@ -189,6 +189,28 @@ exports.getProducts=async (req,res)=>{
 }
 
 
+exports.deleteProductById=(req,res)=>{
+    const id =req.body.id;
+    Product.findByIdAndDelete({_id:id},function(error,result){
+        if(error){
+            res.send({message:"An error has occured"})
+        }
+        res.send({message:"Product SuccessFully Deleted"})
+    })
+
+
+}
+exports.deleteVendorById=(req,res)=>{
+    const id =req.body.id;
+    console.log(id);
+    Vendor.findByIdAndDelete({_id:id},function(error,result){
+        if(error){
+            res.send({message:"An error has occured"})
+        }
+        res.send({message:"Vendor SuccessFully Deleted"})
+    })
+    
+}
 
 // exports.imageUpload=(req, res)=>{
 
