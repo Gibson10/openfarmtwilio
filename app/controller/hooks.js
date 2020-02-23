@@ -55,7 +55,7 @@ switch(req.body.queryResult.intent.displayName) {
     if(Orders){
       res.setHeader("Content-Type","application/json");
       res.send(JSON.stringify({
-        fulfillmentText: `Hello ${Orders.customerName} Welcome back to OpenFarm,We hope you enjoyed your last order of ${Orders.productName}. Here is the list of products we are offering today: \n`+  Product.map((res,index)=>`*${index+1}.* ${res.productName}\nPrice: ${res.productPrice}\nLocation: ${res.vendorLocation}\nShortCode: *${res.code}*\nImage:${UrlShortener(res.productImage)} `).join("\n\n") +'\n' +`Please respond with the Shortcode of the product you are interested in, example *${"XYZ"}*`,
+        fulfillmentText: `Hello ${Orders.customerName} Welcome back to OpenFarm,We hope you enjoyed your last order of ${Orders.productName}. Here is the list of products we are offering today: \n`+  Product.map((res,index)=>`*${index+1}.* ${res.productName}\nPrice: ${res.productPrice}\nLocation: ${res.vendorLocation}\nShortCode: *${res.code}*`).join("\n\n") +'\n' +`Please respond with the Shortcode of the product you are interested in, example *${"XYZ"}*`,
   
         sessionEntityTypes:[
         {
@@ -77,7 +77,7 @@ switch(req.body.queryResult.intent.displayName) {
   
        res.setHeader("Content-Type","application/json");
        res.send(JSON.stringify({
-        fulfillmentText: `Hello Welcome to OpenFarm, here is the list of products we are offering now: \n`+  Product.map(async (res,index)=>`*${index+1}.* ${res.productName}\nPrice: ${res.productPrice}\nLocation: ${res.vendorLocation}\nShortCode: *${res.code}*\nImage:${await UrlShortener(res.productImage)}`).join("\n\n") +'\n' +`Please respond with the Shortcode of the product you are interested in, example *${"XYZ"}*`,
+        fulfillmentText: `Hello Welcome to OpenFarm, here is the list of products we are offering now: \n`+  Product.map((res,index)=>`*${index+1}.* ${res.productName}\nPrice: ${res.productPrice}\nLocation: ${res.vendorLocation}\nShortCode: *${res.code}*`).join("\n\n") +'\n' +`Please respond with the Shortcode of the product you are interested in, example *${"XYZ"}*`,
 
       sessionEntityTypes:[
       {
@@ -123,7 +123,7 @@ switch(req.body.queryResult.intent.displayName) {
        if(confirmation==="A"){
           var ProductPrice= await findProductByCode(productAbbreviation);
           res.setHeader("Content-Type","application/json");
-          res.send({fulfillmentText:`Thank you for making an order for `+ ProductPrice.map((res)=>` ${res.productName}\n Please reply with *${"first"}* and *${"last"}*to continue making an order`)})
+          res.send({fulfillmentText:`Thank you for making an order for `+ ProductPrice.map((res)=>` ${res.productName}\n Please reply with *${"first"}* and *${"last"}*  name to continue making an order`)})
        } else{
 
           res.setHeader("Content-Type","application/json");
@@ -146,7 +146,7 @@ switch(req.body.queryResult.intent.displayName) {
       res.setHeader("Content-Type","application/json");
       res.send( JSON.stringify({fulfillmentText:`Thank you very much ${name} for making an order of ` + ProductDetails.map((res)=> `${res.productName}  at  ${res.productPrice}.We will be processing your order and making a delivery soon. Please reply with *${"mpesa"}* to continue making an mpesa payment and checkout`)}))
 
-      vendorNotification(number1,twilio,createOrder)
+      vendorNotification("whatsapp:+254717708291",twilio,createOrder)
 
     break; 
      
@@ -174,6 +174,7 @@ switch(req.body.queryResult.intent.displayName) {
          var productAbbreviation4=req.body.queryResult.parameters.productAbbreviation;
          var ProductDetails2= await findProductByCode(productAbbreviation3);
          var person=req.body.queryResult.parameters.customerName
+         console.log("JINA",person);
   
          res.setHeader("Content-Type","application/json");
          res.send(JSON.stringify(
@@ -183,8 +184,8 @@ switch(req.body.queryResult.intent.displayName) {
          console.log(MpesaTransactionResponse);
 
          var data={
-            customerName:person,
-            vendorNumber:ProductDetails2.vendorNumber,
+            customerName:person.name,
+            vendorNumber:ProductDetails2.vendorPhone,
             twilioNumber:twilioPhoneNumber,
             phoneNumber:mpesaPhoneNumber,
             orderRef:MpesaTransactionResponse.data.orderRef,
@@ -202,36 +203,36 @@ switch(req.body.queryResult.intent.displayName) {
 }
 
 
-exports.mpesaPayment= async(req, res)=>{
+// exports.mpesaPayment= async(req, res)=>{
 
-          const statusResponse=req.body.Body.stkCallback.ResultDesc;
-          const CheckoutRequestID=req.body.Body.stkCallback.CheckoutRequestID
-   if(statusResponse==="The service request is processed successfully."){
-          const mpesaTransaction = await getMpesaTransaction(CheckoutRequestID)
-   if(mpesaTransaction.length>0){
-          const To=process.env.TWILIO_PHONE_NUMBER;
-          const body=`Thank you, your order will be delivered soon`;
-    for(i=0; i<mpesaTransaction.length;i++ ){
-          const From=TwilioNumberFormat(mpesaTransaction[i].phoneNumber)
-          console.log(To)
-          sendMessage(From,To,body)
-    }
-  }
-    } else{
-          const mpesaTransaction = await getMpesaTransaction(CheckoutRequestID)
-    if(mpesaTransaction.length>0){
-          const To=process.env.TWILIO_PHONE_NUMBER;
-          const body=statusResponse;
-     for(i=0; i<mpesaTransaction.length;i++ ){
-          const From="whatsapp:+"+mpesaTransaction[i].phoneNumber
-          console.log(To)
-          sendMessage(From,To,body)
-    }
-  }
+//           const statusResponse=req.body.Body.stkCallback.ResultDesc;
+//           const CheckoutRequestID=req.body.Body.stkCallback.CheckoutRequestID
+//    if(statusResponse==="The service request is processed successfully."){
+//           const mpesaTransaction = await getMpesaTransaction(CheckoutRequestID)
+//    if(mpesaTransaction.length>0){
+//           const To=process.env.TWILIO_PHONE_NUMBER;
+//           const body=`Thank you, your order will be delivered soon`;
+//     for(i=0; i<mpesaTransaction.length;i++ ){
+//           const From=TwilioNumberFormat(mpesaTransaction[i].phoneNumber)
+//           console.log(To)
+//           sendMessage(From,To,body)
+//     }
+//   }
+//     } else{
+//           const mpesaTransaction = await getMpesaTransaction(CheckoutRequestID)
+//     if(mpesaTransaction.length>0){
+//           const To=process.env.TWILIO_PHONE_NUMBER;
+//           const body=statusResponse;
+//      for(i=0; i<mpesaTransaction.length;i++ ){
+//           const From="whatsapp:+"+mpesaTransaction[i].phoneNumber
+//           console.log(To)
+//           sendMessage(From,To,body)
+//     }
+//   }
 
-}
+// }
 
-}
+// }
 
 
 exports.flutterWave=async(req,res)=>{
@@ -246,7 +247,7 @@ console.log(req.body);
           const To=process.env.TWILIO_PHONE_NUMBER;
           
     for(i=0; i<mpesaTransaction.length;i++ ){
-      const body=`Thank you *${mpesaTransaction[i].customerName}* for your order.It will be delivered soon.For any delayed deliveries please contact *${mpesaTransaction[i].vendorNumber}*  `;
+      const body=`Thank you *${mpesaTransaction[i].customerName}* for your order.It will be delivered soon.For any delayed deliveries please contact *${"0741785762"}*  `;
           const From=TwilioNumberFormat(mpesaTransaction[i].phoneNumber)
           console.log(To)
           sendMessage(From,To,body)
