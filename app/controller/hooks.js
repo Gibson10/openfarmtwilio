@@ -2,6 +2,7 @@ require('dotenv').config()
 const {runQuery}= require("../../utils/dialogueflow");
 const {sendMessage}= require("../../utils/twilio");
 const {MpesaTransaction} =require('../../utils/mpesa')
+const  {flutterWavePayment}=require('../../utils/flutterwave')
 const {findProducts, findProductByCode,findOrders,addOrders,addMpesaTransaction,getMpesaTransaction,findOrdersbyNumber}=require('../../utils/Queries');
 const {MpesaNumberFormat,TwilioNumberFormat,twilioToNormalNumberFormat} = require('../../services/PhoneNumber') 
 const {vendorNotification}= require('../../utils/Notifications');
@@ -154,11 +155,11 @@ switch(req.body.queryResult.intent.displayName) {
          res.send(JSON.stringify(
            {fulfillmentText:`Your number has been approved, you will be prompted to enter your M-pesa Pin  shortly on the phone with the number ${phonenumber}` }))
 
-         var MpesaTransactionResponse= await MpesaTransaction(mpesaPhoneNumber); 
+         var MpesaTransactionResponse= await flutterWavePayment(phonenumber); 
          var data={
             twilioNumber:twilioPhoneNumber,
             phoneNumber:mpesaPhoneNumber,
-            CheckoutRequestID:MpesaTransactionResponse.CheckoutRequestID,
+            orderRef:MpesaTransactionResponse.data.orderRef,
         }
          addMpesaTransaction(data)
 
@@ -188,10 +189,44 @@ switch(req.body.queryResult.intent.displayName) {
 
 
 exports.mpesaPayment= async(req, res)=>{
+
           const statusResponse=req.body.Body.stkCallback.ResultDesc;
           const CheckoutRequestID=req.body.Body.stkCallback.CheckoutRequestID
    if(statusResponse==="The service request is processed successfully."){
           const mpesaTransaction = await getMpesaTransaction(CheckoutRequestID)
+   if(mpesaTransaction.length>0){
+          const To=process.env.TWILIO_PHONE_NUMBER;
+          const body=`Please enter your *${"First"}* and *${"Last"}* Name`;
+    for(i=0; i<mpesaTransaction.length;i++ ){
+          const From=TwilioNumberFormat(mpesaTransaction[i].phoneNumber)
+          console.log(To)
+          sendMessage(From,To,body)
+    }
+  }
+    } else{
+          const mpesaTransaction = await getMpesaTransaction(CheckoutRequestID)
+    if(mpesaTransaction.length>0){
+          const To=process.env.TWILIO_PHONE_NUMBER;
+          const body=statusResponse;
+     for(i=0; i<mpesaTransaction.length;i++ ){
+          const From="whatsapp:+"+mpesaTransaction[i].phoneNumber
+          console.log(To)
+          sendMessage(From,To,body)
+    }
+  }
+
+}
+
+}
+
+
+exports.flutterWave=async(req,res)=>{
+console.log(req.body);
+   const statusResponse=req.body.status;
+   const orderRef=req.body.orderRef
+   if(statusResponse==="successful"){
+
+          const mpesaTransaction = await getMpesaTransaction(orderRef)
    if(mpesaTransaction.length>0){
           const To=process.env.TWILIO_PHONE_NUMBER;
           const body=`Please enter your *${"First"}* and *${"Last"}* Name`;
