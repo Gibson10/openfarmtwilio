@@ -69,7 +69,7 @@ class Rave {
 	}
 }
 function flutterWavePayment(number){
-
+return new Promise((resolve, reject) => {
 var rave = new Rave(process.env.FLUTTERWAVE_PUBLIC_KEY,process.env.FLUTTERWAVE_SECRECT_KEY);
 
 rave.initiatePayment({
@@ -90,10 +90,11 @@ rave.initiatePayment({
   "is_mpesa_lipa": 1,
   "is_mocked": false 
 
-  }).then(result => console.log(result))
-    .catch(error => console.log(error));
+  }).then(result => (resolve(result))
+  ).catch(error => (reject(error)));
 }
-
+)
+}
 module.exports={
     flutterWavePayment
 }

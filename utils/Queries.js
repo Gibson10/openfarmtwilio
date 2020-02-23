@@ -91,7 +91,7 @@ function addMpesaTransaction(data){
 
 function getMpesaTransaction(id){
   return new Promise(function (resolve,reject){
-    MpesaTransation.find({CheckoutRequestID:id} ,function(err, result){
+    MpesaTransation.find({orderRef:id} ,function(err, result){
         if(err){
         reject(err);
         }

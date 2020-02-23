@@ -7,6 +7,8 @@ var mongoose = require('mongoose');
  var mpesaSchema = new mongoose.Schema({
   orderRef : String,
   phoneNumber: String,
+  customerName:String,
+  vendorNumber:String,
   twilioNumber:String,
   createdAt   : {
     type      : Date,

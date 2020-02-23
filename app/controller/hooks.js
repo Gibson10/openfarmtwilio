@@ -114,6 +114,8 @@ switch(req.body.queryResult.intent.displayName) {
     
     break;
 
+    
+
     case 'Start - confirmation':
           var confirmation=req.body.queryResult.queryText;
           var productAbbreviation=req.body.queryResult.parameters.productAbbreviation;
@@ -121,20 +123,38 @@ switch(req.body.queryResult.intent.displayName) {
        if(confirmation==="A"){
           var ProductPrice= await findProductByCode(productAbbreviation);
           res.setHeader("Content-Type","application/json");
-          res.send({fulfillmentText:`Thank you for making an order for `+ ProductPrice.map((res)=>` ${res.productName}\n Please reply with *${"mpesa"}* to continue making an mpesa payment`)})
+          res.send({fulfillmentText:`Thank you for making an order for `+ ProductPrice.map((res)=>` ${res.productName}\n Please reply with *${"first"}* and *${"last"}*to continue making an order`)})
        } else{
 
           res.setHeader("Content-Type","application/json");
           res.send({fulfillmentText:`Thank you for your interest, please restart the process by typing 'hi' or 'hello' or 'start' `})
        }
 
+
     break;
+
+    case 'Start - confirmation - customerName':
+      var number1=req.body.originalDetectIntentRequest.payload.customerNumber;
+      var twilio=req.body.originalDetectIntentRequest.payload.twilioNumber
+      var phoneNumber=twilioToNormalNumberFormat(number1);
+      var name=req.body.queryResult.queryText;
+      var productAbbreviation3=req.body.queryResult.parameters.productAbbreviation;
+      var ProductDetails= await findProductByCode(productAbbreviation3);
+      var createOrder=await addOrders(ProductDetails,name,"mpesa",phoneNumber)
+      console.log("ORDER",createOrder);
+
+      res.setHeader("Content-Type","application/json");
+      res.send( JSON.stringify({fulfillmentText:`Thank you very much ${name} for making an order of ` + ProductDetails.map((res)=> `${res.productName}  at  ${res.productPrice}.We will be processing your order and making a delivery soon. Please reply with *${"mpesa"}* to continue making an mpesa payment and checkout`)}))
+
+      vendorNotification(number1,twilio,createOrder)
+
+    break; 
      
-    case 'Start - confirmation - payment':   
+    case 'Start - confirmation - paymentMethod':   
           var payment=req.body.queryResult.queryText;
       if(payment.toLowerCase()==='mpesa'){
           res.setHeader("Content-Type","application/json");
-          res.send({fulfillmentText: `Please enter your mpesa number to continue.Example(*${'07xxxxxxxx'}*)`,
+          res.send({fulfillmentText: `Please enter your mpesa number to continue.Example *${"07xxxxxxxx"}* `,
         });
       }
          res.setHeader("Content-Type","application/json");
@@ -146,41 +166,35 @@ switch(req.body.queryResult.intent.displayName) {
            
     break;
 
-    case 'Start - confirmation - mpesa - number':
+
+    case 'Start - confirmation - mpesa - phoneNumber':
          var twilioPhoneNumber=req.body.originalDetectIntentRequest.payload.twilioNumber;
          var phonenumber=req.body.queryResult.queryText;
          var mpesaPhoneNumber= MpesaNumberFormat(phonenumber);
+         var productAbbreviation4=req.body.queryResult.parameters.productAbbreviation;
+         var ProductDetails2= await findProductByCode(productAbbreviation3);
+         var person=req.body.queryResult.parameters.customerName
   
          res.setHeader("Content-Type","application/json");
          res.send(JSON.stringify(
-           {fulfillmentText:`Your number has been approved, you will be prompted to enter your M-pesa Pin  shortly on the phone with the number ${phonenumber}` }))
+           {fulfillmentText:`Your number has been approved, you will be prompted to enter your M-pesa Pin  shortly on the phone with the number ${phonenumber}\n.Once you enter the number wait for the payment to be fully processed.` }))
 
          var MpesaTransactionResponse= await flutterWavePayment(phonenumber); 
+         console.log(MpesaTransactionResponse);
+
          var data={
+            customerName:person,
+            vendorNumber:ProductDetails2.vendorNumber,
             twilioNumber:twilioPhoneNumber,
             phoneNumber:mpesaPhoneNumber,
             orderRef:MpesaTransactionResponse.data.orderRef,
         }
-         addMpesaTransaction(data)
+        const NewMpesaTransaction=await addMpesaTransaction(data)
+        console.log(NewMpesaTransaction);
 
     break;
 
-    case 'Start - confirmation - payment - username':
-          var number1=req.body.originalDetectIntentRequest.payload.customerNumber;
-          var twilio=req.body.originalDetectIntentRequest.payload.twilioNumber
-          var phoneNumber=twilioToNormalNumberFormat(number1);
-          var name=req.body.queryResult.queryText;
-          var productAbbreviation3=req.body.queryResult.parameters.productAbbreviation;
-          var ProductDetails= await findProductByCode(productAbbreviation3);
-          var createOrder=await addOrders(ProductDetails,name,"mpesa",phoneNumber)
-          console.log("ORDER",createOrder);
-
-          res.setHeader("Content-Type","application/json");
-          res.send( JSON.stringify({fulfillmentText:`Thank you very much ${name} for making an order of ` + ProductDetails.map((res)=> `${res.productName}  at  ${res.productPrice}.We will be processing your order and making a delivery soon. Please don't hesitate to contact ${res.vendorPhone} for a delayed delivery`)}))
-
-          vendorNotification(number1,twilio,createOrder)
-
-    break;  
+   
 
   default:
 
@@ -196,7 +210,7 @@ exports.mpesaPayment= async(req, res)=>{
           const mpesaTransaction = await getMpesaTransaction(CheckoutRequestID)
    if(mpesaTransaction.length>0){
           const To=process.env.TWILIO_PHONE_NUMBER;
-          const body=`Please enter your *${"First"}* and *${"Last"}* Name`;
+          const body=`Thank you, your order will be delivered soon`;
     for(i=0; i<mpesaTransaction.length;i++ ){
           const From=TwilioNumberFormat(mpesaTransaction[i].phoneNumber)
           console.log(To)
@@ -225,12 +239,14 @@ console.log(req.body);
    const statusResponse=req.body.status;
    const orderRef=req.body.orderRef
    if(statusResponse==="successful"){
-
+ console.log(req.body.customer)
           const mpesaTransaction = await getMpesaTransaction(orderRef)
+          console.log("TRANSACTION",mpesaTransaction);
    if(mpesaTransaction.length>0){
           const To=process.env.TWILIO_PHONE_NUMBER;
-          const body=`Please enter your *${"First"}* and *${"Last"}* Name`;
+          
     for(i=0; i<mpesaTransaction.length;i++ ){
+      const body=`Thank you *${mpesaTransaction[i].customerName}* for your order.It will be delivered soon.For any delayed deliveries please contact *${mpesaTransaction[i].vendorNumber}*  `;
           const From=TwilioNumberFormat(mpesaTransaction[i].phoneNumber)
           console.log(To)
           sendMessage(From,To,body)
