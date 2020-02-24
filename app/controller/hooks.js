@@ -146,8 +146,8 @@ switch(req.body.queryResult.intent.displayName) {
       res.setHeader("Content-Type","application/json");
       res.send( JSON.stringify({fulfillmentText:`Thank you very much ${name} for making an order of ` + ProductDetails.map((res)=> `${res.productName}  at  ${res.productPrice}.We will be processing your order and making a delivery soon. Please reply with *${"mpesa"}* to continue making an mpesa payment and checkout`)}))
 
-      vendorNotification("whatsapp:+254741785762",twilio,createOrder)
-      vendorTextNotification("+254741785762","+16193206948",createOrder)
+      // vendorNotification("whatsapp:+254741785762",twilio,createOrder)
+      // vendorTextNotification("+254741785762","+16193206948",createOrder)
 
 
     break; 
@@ -186,6 +186,9 @@ switch(req.body.queryResult.intent.displayName) {
          console.log(MpesaTransactionResponse);
 
          var data={
+            vendorName:ProductDetails2.vendorName,
+            productName:ProductDetails2.productName,
+            productPrice:ProductDetails2.productPrice,
             customerName:person.name,
             vendorNumber:ProductDetails2.vendorPhone,
             twilioNumber:twilioPhoneNumber,
@@ -253,6 +256,8 @@ console.log(req.body);
           const From=TwilioNumberFormat(mpesaTransaction[i].phoneNumber)
           console.log(To)
           sendMessage(From,To,body)
+          vendorNotification("whatsapp:+254741785762",twilio,mpesaTransaction[i])
+          vendorTextNotification("+254741785762","+16193206948",mpesaTransaction[i])
     }
   }
     } else{

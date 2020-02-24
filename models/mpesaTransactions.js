@@ -9,6 +9,9 @@ var mongoose = require('mongoose');
   phoneNumber: String,
   customerName:String,
   vendorNumber:String,
+  vendorName:String,
+  productName:String,
+  productPrice:String,
   twilioNumber:String,
   createdAt   : {
     type      : Date,

@@ -2,9 +2,9 @@ const {sendMessage}= require('./twilio')
 
 
 
-function vendorNotification(vendorNumber,twilioNumber, data){
+function vendorNotification(vendorNumber,twilioNumber, data,){
 
-    const body=`Hello ${data.vendorName}, you have received an order of ${data.productName}  at ${data.productPrice} from ${data.customerName}. Please contact ${data.customerName} at ${data.customerNumber} for delivery`;
+    const body=`Hello ${data.vendorName}, you have received an order of ${data.productName}  at ${data.productPrice} from ${data.customerName}. Please contact ${data.customerName} at ${data.mpesaPhoneNumber} for delivery`;
 
     sendMessage( vendorNumber,twilioNumber, body)
 
@@ -13,7 +13,7 @@ function vendorNotification(vendorNumber,twilioNumber, data){
 
 function vendorTextNotification(vendorNumber,twilioNumber, data){
 
-    const body=`Hello ${data.vendorName}, you have received an order of ${data.productName}  at ${data.productPrice} from ${data.customerName}. Please contact ${data.customerName} at ${data.customerNumber} for delivery`;
+    const body=`Hello ${data.vendorName}, you have received an order of ${data.productName}  at ${data.productPrice} from ${data.customerName}. Please contact ${data.customerName} at ${data.mpesaPhoneNumber} for delivery`;
 
     sendMessage( vendorNumber,twilioNumber, body)
 }
