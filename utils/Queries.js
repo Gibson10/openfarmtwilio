@@ -29,6 +29,17 @@ function findProductByCode(code){
   });
 }
 
+function findProductByCodeMpesaTransaction(code){
+  return new Promise(function (resolve,reject){
+      Product.findOne({code:code} ,function(err, result){
+          if(err){
+          reject(err);
+          }
+          resolve (result);
+        });
+  });
+}
+
 function findOrders(){
   return new Promise(function (resolve,reject){
     Orders.find({} ,function(err, result){
@@ -126,6 +137,7 @@ function makeid() {
 module.exports={
     findProducts,
     makeid,
+    findProductByCodeMpesaTransaction,
     findProductByCode,
     findOrders,
     addOrders,

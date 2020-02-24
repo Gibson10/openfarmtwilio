@@ -3,7 +3,7 @@ const {runQuery}= require("../../utils/dialogueflow");
 const {sendMessage}= require("../../utils/twilio");
 const {MpesaTransaction} =require('../../utils/mpesa')
 const  {flutterWavePayment}=require('../../utils/flutterwave')
-const {findProducts, findProductByCode,findOrders,addOrders,addMpesaTransaction,getMpesaTransaction,findOrdersbyNumber}=require('../../utils/Queries');
+const {findProducts, findProductByCode,findOrders,addOrders,addMpesaTransaction,getMpesaTransaction,findOrdersbyNumber,findProductByCodeMpesaTransaction}=require('../../utils/Queries');
 const {MpesaNumberFormat,TwilioNumberFormat,twilioToNormalNumberFormat} = require('../../services/PhoneNumber') 
 const {vendorNotification,vendorTextNotification}= require('../../utils/Notifications');
 const {UrlShortener} = require('../../services/urlshortener');
@@ -174,7 +174,7 @@ switch(req.body.queryResult.intent.displayName) {
          var phonenumber=req.body.queryResult.queryText;
          var mpesaPhoneNumber= MpesaNumberFormat(phonenumber);
          var productAbbreviation4=req.body.queryResult.parameters.productAbbreviation;
-         var ProductDetails2= await findProductByCode(productAbbreviation4);
+         var ProductDetails2= await findProductByCodeMpesaTransaction(productAbbreviation4);
          var person=req.body.queryResult.parameters.customerName
          console.log("JINA",ProductDetails2);
   
