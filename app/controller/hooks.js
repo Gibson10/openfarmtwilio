@@ -5,7 +5,7 @@ const {MpesaTransaction} =require('../../utils/mpesa')
 const  {flutterWavePayment}=require('../../utils/flutterwave')
 const {findProducts, findProductByCode,findOrders,addOrders,addMpesaTransaction,getMpesaTransaction,findOrdersbyNumber}=require('../../utils/Queries');
 const {MpesaNumberFormat,TwilioNumberFormat,twilioToNormalNumberFormat} = require('../../services/PhoneNumber') 
-const {vendorNotification}= require('../../utils/Notifications');
+const {vendorNotification,vendorTextNotification}= require('../../utils/Notifications');
 const {UrlShortener} = require('../../services/urlshortener');
 
 
@@ -146,7 +146,9 @@ switch(req.body.queryResult.intent.displayName) {
       res.setHeader("Content-Type","application/json");
       res.send( JSON.stringify({fulfillmentText:`Thank you very much ${name} for making an order of ` + ProductDetails.map((res)=> `${res.productName}  at  ${res.productPrice}.We will be processing your order and making a delivery soon. Please reply with *${"mpesa"}* to continue making an mpesa payment and checkout`)}))
 
-      vendorNotification("whatsapp:+254717708291",twilio,createOrder)
+      vendorNotification("whatsapp:+254741785762",twilio,createOrder)
+      vendorTextNotification("+254741785762","+16193206948",createOrder)
+
 
     break; 
      
