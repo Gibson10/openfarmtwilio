@@ -256,7 +256,7 @@ console.log(req.body);
           const From=TwilioNumberFormat(mpesaTransaction[i].phoneNumber)
           console.log(To)
           sendMessage(From,To,body)
-          vendorNotification("whatsapp:+254741785762",twilio,mpesaTransaction[i])
+          vendorNotification("whatsapp:+254741785762","whatsapp:+14155238886",mpesaTransaction[i])
           vendorTextNotification("+254741785762","+16193206948",mpesaTransaction[i])
     }
   }
