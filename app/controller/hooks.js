@@ -174,7 +174,7 @@ switch(req.body.queryResult.intent.displayName) {
          var phonenumber=req.body.queryResult.queryText;
          var mpesaPhoneNumber= MpesaNumberFormat(phonenumber);
          var productAbbreviation4=req.body.queryResult.parameters.productAbbreviation;
-         var ProductDetails2= await findProductByCode(productAbbreviation3);
+         var ProductDetails2= await findProductByCode(productAbbreviation4);
          var person=req.body.queryResult.parameters.customerName
          console.log("JINA",ProductDetails2);
   
