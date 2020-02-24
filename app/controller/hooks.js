@@ -176,7 +176,7 @@ switch(req.body.queryResult.intent.displayName) {
          var productAbbreviation4=req.body.queryResult.parameters.productAbbreviation;
          var ProductDetails2= await findProductByCode(productAbbreviation3);
          var person=req.body.queryResult.parameters.customerName
-         console.log("JINA",person);
+         console.log("JINA",ProductDetails2);
   
          res.setHeader("Content-Type","application/json");
          res.send(JSON.stringify(
