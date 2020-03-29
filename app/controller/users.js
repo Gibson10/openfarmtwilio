@@ -49,6 +49,9 @@ exports.registration = async (req, res) => {
 
 
 exports.loginUser = (req, res, next) => {
+
+	console.log(req.body);
+
   req.body.username = req.body.username.toLowerCase();
 	passport.authenticate('local', function(err, user, info) {
 		if (err) {

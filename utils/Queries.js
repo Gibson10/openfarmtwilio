@@ -1,4 +1,5 @@
 const Product = require('../models/product')
+const WhatsAppOrders=require('../models/androidorders')
 const Orders=require('../models/orders');
 const MpesaTransation=require('../models/mpesaTransactions')
 const User= require('../models/users')
@@ -12,9 +13,18 @@ function findProducts(){
             }
             resolve (result);
           });
-    });
+    });     
+}
 
-      
+function findAndroidOrders(){
+  return new Promise(function (resolve,reject){
+    WhatsAppOrders.find({} ,function(err, result){
+          if(err){
+          reject(err);
+          }
+          resolve (result);
+        });
+  });     
 }
 
 
@@ -144,5 +154,6 @@ module.exports={
     addMpesaTransaction,
     getMpesaTransaction,
     findUserByToken,
-    findOrdersbyNumber
+    findOrdersbyNumber,
+    findAndroidOrders
 }

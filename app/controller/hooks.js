@@ -6,6 +6,7 @@ const  {flutterWavePayment}=require('../../utils/flutterwave')
 const {findProducts, findProductByCode,findOrders,addOrders,addMpesaTransaction,getMpesaTransaction,findOrdersbyNumber,findProductByCodeMpesaTransaction}=require('../../utils/Queries');
 const {MpesaNumberFormat,TwilioNumberFormat,twilioToNormalNumberFormat} = require('../../services/PhoneNumber') 
 const {vendorNotification,vendorTextNotification}= require('../../utils/Notifications');
+const {sendMessagewithImage} =require('../../services/MessagewithImage')
 const {UrlShortener} = require('../../services/urlshortener');
 
 
@@ -97,21 +98,13 @@ switch(req.body.queryResult.intent.displayName) {
     }
 
   case "Start - custom":
-         var code=req.body.queryResult.queryText;
-         var ProductbyCode = await findProductByCode(code);
-     if(ProductbyCode.length>0){
-         res.setHeader("Content-Type","application/json");
-         res.send({fulfillmentText:`Great Choice! You have selected `+ ProductbyCode.map((res)=>`${res.productName}\n Do you want to continue to purchase ${res.productName} at ${res.productPrice}`) + `\n *${"A"}*:yes \n *${"B"}*:no`      
-      })
-    }else{
-         res.setHeader("Content-Type","application/json");
-         res.send({fulfillmentText:`Sorry, we could not find the Product, Please enter the *
-        ${"ShorCode"}* again.Please confirm before resending`
-              
-      })
-
-    }
-    
+        var usernumber=req.body.originalDetectIntentRequest.payload.customerNumber;
+        var twiliosendnumber=req.body.originalDetectIntentRequest.payload.twilioNumber;
+        var code=req.body.queryResult.queryText;
+        var ProductbyCode = await findProductByCodeMpesaTransaction(code);
+        var textBody=`Great Choice! You have selected ${ProductbyCode.productName}\n Do you want to continue to purchase ${ProductbyCode.productName} at ${ProductbyCode.productPrice}` + `\n *${"A"}*:yes \n *${"B"}*:no`; 
+          
+        sendMessagewithImage(usernumber,twiliosendnumber,textBody,ProductbyCode.productImage);
     break;
 
     
@@ -119,7 +112,6 @@ switch(req.body.queryResult.intent.displayName) {
     case 'Start - confirmation':
           var confirmation=req.body.queryResult.queryText;
           var productAbbreviation=req.body.queryResult.parameters.productAbbreviation;
-
        if(confirmation==="A"){
           var ProductPrice= await findProductByCode(productAbbreviation);
           res.setHeader("Content-Type","application/json");
@@ -129,7 +121,6 @@ switch(req.body.queryResult.intent.displayName) {
           res.setHeader("Content-Type","application/json");
           res.send({fulfillmentText:`Thank you for your interest, please restart the process by typing 'hi' or 'hello' or 'start' `})
        }
-
 
     break;
 
@@ -145,11 +136,6 @@ switch(req.body.queryResult.intent.displayName) {
 
       res.setHeader("Content-Type","application/json");
       res.send( JSON.stringify({fulfillmentText:`Thank you very much ${name} for making an order of ` + ProductDetails.map((res)=> `${res.productName}  at  ${res.productPrice}.We will be processing your order and making a delivery soon. Please reply with *${"mpesa"}* to continue making an mpesa payment and checkout`)}))
-
-      // vendorNotification("whatsapp:+254741785762",twilio,createOrder)
-      // vendorTextNotification("+254741785762","+16193206948",createOrder)
-
-
     break; 
      
     case 'Start - confirmation - paymentMethod':   
@@ -207,37 +193,6 @@ switch(req.body.queryResult.intent.displayName) {
 }
 }
 
-
-// exports.mpesaPayment= async(req, res)=>{
-
-//           const statusResponse=req.body.Body.stkCallback.ResultDesc;
-//           const CheckoutRequestID=req.body.Body.stkCallback.CheckoutRequestID
-//    if(statusResponse==="The service request is processed successfully."){
-//           const mpesaTransaction = await getMpesaTransaction(CheckoutRequestID)
-//    if(mpesaTransaction.length>0){
-//           const To=process.env.TWILIO_PHONE_NUMBER;
-//           const body=`Thank you, your order will be delivered soon`;
-//     for(i=0; i<mpesaTransaction.length;i++ ){
-//           const From=TwilioNumberFormat(mpesaTransaction[i].phoneNumber)
-//           console.log(To)
-//           sendMessage(From,To,body)
-//     }
-//   }
-//     } else{
-//           const mpesaTransaction = await getMpesaTransaction(CheckoutRequestID)
-//     if(mpesaTransaction.length>0){
-//           const To=process.env.TWILIO_PHONE_NUMBER;
-//           const body=statusResponse;
-//      for(i=0; i<mpesaTransaction.length;i++ ){
-//           const From="whatsapp:+"+mpesaTransaction[i].phoneNumber
-//           console.log(To)
-//           sendMessage(From,To,body)
-//     }
-//   }
-
-// }
-
-// }
 
 
 exports.flutterWave=async(req,res)=>{

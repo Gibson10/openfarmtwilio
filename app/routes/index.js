@@ -17,16 +17,14 @@ const getCustomerByPhone=ctrl.transactions;
 const getVendorByPhone=ctrl.transactions
 const deleteProductById=ctrl.transactions
 const deleteVendorById=ctrl.transactions
+const addAndroidOrders=ctrl.transactions
+const getAndroidOrders=ctrl.transactions
 
 const hooks=ctrl.hooks;
 
-
-
-
-
- 
-
 router.post('/addOrders',urlencodedParser, orderCtrl.addOrder);
+router.post('/addAndroidOrders',urlencodedParser, addAndroidOrders.addAndroidOrders);
+router.get('/getAndroidOrders',urlencodedParser, getAndroidOrders.getAndroidOrders);
 router.post('/addTransactions',urlencodedParser, transactionCtrl.addTransaction);
 router.post('/addVendors',urlencodedParser, vendorCtrl.addVendors);
 router.post('/addProducts',urlencodedParser,upload,productCtrl.addProducts);

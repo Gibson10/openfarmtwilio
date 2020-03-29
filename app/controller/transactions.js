@@ -7,8 +7,9 @@ const cloudinary = require('cloudinary');
 const express = require('express');
 const {upload}=require('../../services/imageupload');
 const Order=require('../../models/orders');
+const WhatsAppOrders=require('../../models/androidorders')
 const  Vendor= require('../../models/vendors');
-const {findProducts,makeid,findOrders}=require('../../utils/Queries');
+const {findProducts,makeid,findOrders,findAndroidOrders}=require('../../utils/Queries');
 
 
 
@@ -99,8 +100,11 @@ exports.addVendors=(req,res)=>{
 
 exports.addOrder=(req,res)=>{
     console.log(req.body)
-    const data= req.body;
+    const data= req.body.products;
 
+    for(var i=0; i<data.length; i++){
+
+        console.log("GIBSON",data[i])
     Order.create(data, function(err, result){
      if(err){
         return res.send("There was an error");
@@ -109,10 +113,13 @@ exports.addOrder=(req,res)=>{
      
      return res.send(result)
      
-
     })
+    }
+   
     
 }
+
+
 
 
 exports.getOrders= async(req, res)=>{
@@ -210,6 +217,29 @@ exports.deleteVendorById=(req,res)=>{
         res.send({message:"Vendor SuccessFully Deleted"})
     })
     
+}
+exports.getAndroidOrders= async(req,res)=>{
+    // WhatsAppOrders.find({}, function(req,res){
+
+    // })
+    const Orders= await findAndroidOrders()
+    res.send({message:'SuccessFully got orders',data:Orders})
+
+}
+
+exports.addAndroidOrders =(req,res)=>{
+    const data= req.body
+    console.log(data)
+    WhatsAppOrders.create(data, function(err,result){
+
+        if(err){ 
+            return res.send("There was an error");
+         }else{
+    
+         
+         return res.send(result)}
+        
+    })
 }
 
 // exports.imageUpload=(req, res)=>{
